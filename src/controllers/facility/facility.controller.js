@@ -102,6 +102,7 @@ const allFacility = async (req, res) => {
 const detailOfFacility = async (req, res) => {
   const { id } = req.params;
   try {
+    
     const data = await Facility.findById(id).lean();
 
     if (data) {
