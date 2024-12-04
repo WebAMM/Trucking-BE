@@ -20,10 +20,10 @@ const facilitySchema = new mongoose.Schema(
     profileUrl: {
       type: String,
     },
-    PhoneNumber: {
+    phoneNumber: {
       type: String,
     },
-    WebsiteURL: {
+    websiteURL: {
       type: String,
     },
     longitude: {

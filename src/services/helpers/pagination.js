@@ -7,17 +7,17 @@ const paginate = async (model, query, page, limit) => {
 
   const data = await model
     .find(query)
-    .sort("-createdAt")
+    .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
     .lean();
 
-  const totalRecord = await model.countDocuments(query);
+  const totalRecords = await model.countDocuments(query);
 
   return {
     data,
-    totalRecord,
-    totalPages: Math.ceil(totalRecord / limit),
+    totalRecords,
+    totalPages: Math.ceil(totalRecords / limit),
     currentPage: page,
     limit,
   };
