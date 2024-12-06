@@ -1,6 +1,7 @@
 const router = require("express").Router();
 //controller
 const facilityController = require("../controllers/facility/facility.controller");
+const { verifyToken } = require("../middlewares/auth.middleware");
 
 //All facility, using the organization bulk api of Apollo
 router.get("/all", facilityController.allFacility);
@@ -12,12 +13,23 @@ router.get("/detail/:id", facilityController.detailOfFacility);
 router.get("/contact-list/:orgId", facilityController.facilityContactList);
 
 //Save the facility to saved facilities
-router.post("/save", facilityController.saveFacility);
+router.post("/save", verifyToken, facilityController.saveFacility);
 
 //Get the saved facility
-router.get("/saved-facility", facilityController.allSavedFacilities);
+router.get(
+  "/saved-facility",
+  verifyToken,
+  facilityController.allSavedFacilities
+);
 
-//Attach the sale area to the facility
-router.put("/attach-saleArea/:id", facilityController.attachSaleArea);
+//Attach the sale area to the facility later on using the listing
+router.put("/attach-sale-area/:id", facilityController.attachSaleArea);
+
+//Change status of facility
+router.patch(
+  "/status/:id",
+  verifyToken,
+  facilityController.changeFacilityStatus
+);
 
 module.exports = router;

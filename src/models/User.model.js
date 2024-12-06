@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcryptjs = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
@@ -9,6 +10,9 @@ const userSchema = new mongoose.Schema(
       type: String,
     },
     password: {
+      type: String,
+    },
+    phoneNo: {
       type: String,
     },
     status: {
@@ -33,6 +37,7 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: ["SuperAdmin", "Admin", "User"],
+      default: "User",
       required: [true, "Please provide role"],
     },
   },
@@ -40,6 +45,17 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+userSchema.pre("save", async function save(next) {
+  if (!this.isModified("password")) return next();
+  try {
+    const salt = 10;
+    this.password = bcryptjs.hashSync(this.password, salt);
+    return next();
+  } catch (err) {
+    return next(err);
+  }
+});
 
 const User = mongoose.model("User", userSchema);
 module.exports = User;

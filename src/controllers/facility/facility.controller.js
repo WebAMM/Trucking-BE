@@ -1,5 +1,6 @@
 //Model
 const Facility = require("../../models/Facility.model.js");
+const SaleArea = require("../../models/SaleArea.model.js");
 const SavedFacility = require("../../models/SavedFacility.model.js");
 const {
   bulkOrganizationEnrichment,
@@ -129,14 +130,56 @@ const facilityContactList = async (req, res, next) => {
 };
 
 const saveFacility = async (req, res, next) => {
+  const { facilityId, saleAreaId, saleAreaName } = req.body;
   try {
-    await SavedFacility.create({
-      facilityId: req.body.facilityId,
-      shortDescription: req.body.shortDescription,
-      industry: req.body.industry,
-      linkedInUrl: req.body.linkedInUrl,
-    });
+    if (saleAreaId) {
+      const existSaleArea = await SaleArea.findById(saleAreaId);
+      if (existSaleArea) {
+        existSaleArea.facilityIds.push(facilityId);
+        await existSaleArea.save();
+        await SavedFacility.create({
+          facilityId: req.body.facilityId,
+          saleAreaId: req.body.existSaleArea._id,
+          userId: req.user._id,
+          shortDescription: req.body.shortDescription,
+          industry: req.body.industry,
+          linkedIn: req.body.linkedIn,
+        });
+      } else return error404(res, "No such sale area found");
+    } else if (saleAreaName) {
+      const newSaleArea = await SaleArea.create({
+        name: saleAreaName,
+        facilityIds: [facilityId],
+        status: "Active",
+      });
+      await SavedFacility.create({
+        facilityId: req.body.facilityId,
+        saleAreaId: newSaleArea._id.toString(),
+        userId: req.user._id,
+        shortDescription: req.body.shortDescription,
+        industry: req.body.industry,
+        linkedInUrl: req.body.linkedInUrl,
+      });
+    }
+
     return status200(res, "Facility saved successfully");
+  } catch (err) {
+    return next(err);
+  }
+};
+
+const changeFacilityStatus = async (req, res, next) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  console.log("The", req.body);
+  try {
+    const updatedFacility = await SavedFacility.findByIdAndUpdate(id, {
+      status,
+    });
+    if (updatedFacility) {
+      return status200(res, `Facility status updated to ${status}`);
+    }
+    return error404(res, "No facility found");
   } catch (err) {
     return next(err);
   }
@@ -164,8 +207,13 @@ const allSavedFacilities = async (req, res, next) => {
   try {
     // const { data, totalRecords, totalPages, currentPage, limit } =
     //   await paginate(SavedFacility, {}, page, pageSize);
-    const data = await SavedFacility.find().populate({ path: "facilityId" });
-    return success(res, 200, "Saved facility", data);
+    const data = await SavedFacility.find({
+      userId: req.user._id,
+    }).populate({ path: "facilityId" });
+    if (data) {
+      return success(res, 200, "Saved facility", data);
+    }
+    return error404(res, "No saved facility found");
   } catch (err) {
     return next(err);
   }
@@ -178,4 +226,5 @@ module.exports = {
   saveFacility,
   allSavedFacilities,
   attachSaleArea,
+  changeFacilityStatus,
 };

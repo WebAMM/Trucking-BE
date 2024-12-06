@@ -8,9 +8,13 @@ const saleAreaSchema = new mongoose.Schema(
     facilityIds: [
       {
         type: mongoose.Types.ObjectId,
-        ref: "Facility",
+        ref: "SavedFacility",
       },
     ],
+    noOfFacility: {
+      type: Number,
+      default: 0,
+    },
     note: {
       type: String,
     },

@@ -1,5 +1,6 @@
 //Model
 const SaleArea = require("../../models/SaleArea.model.js");
+const SavedFacility = require("../../models/SavedFacility.model.js");
 //Response and errors
 const {
   error500,
@@ -9,7 +10,7 @@ const {
 const { status200, success } = require("../../services/helpers/response.js");
 
 //Attach sales area
-const attachSaleArea = async (req, res, next) => {
+const createSaleArea = async (req, res, next) => {
   const { facilityId, saleAreaId, name } = req.body;
   try {
     if (saleAreaId) {
@@ -35,6 +36,33 @@ const attachSaleArea = async (req, res, next) => {
   }
 };
 
+const getSalesArea = async (req, res, next) => {
+  try {
+    const data = await SaleArea.find();
+    return success(res, 200, "All sales area", data);
+  } catch (err) {
+    return next(err);
+  }
+};
+
+const getAllFacilities = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const data = await SavedFacility.find({ saleAreaId: id }).populate({
+      path: "facilityId",
+    });
+    if (!data) {
+      return error404(res, "No such sale area found");
+    }
+    return success(res, 200, "All Facility of Sale Area", data);
+  } catch (err) {
+    return next(err);
+  }
+};
+
 module.exports = {
-  attachSaleArea,
+  createSaleArea,
+  getSalesArea,
+  getAllFacilities,
 };

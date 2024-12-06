@@ -8,7 +8,7 @@ const savedFacilitySchema = new mongoose.Schema(
     },
     saleAreaId: {
       type: mongoose.Types.ObjectId,
-      ref: "SalesArea",
+      ref: "SaleArea",
     },
     userId: {
       type: mongoose.Types.ObjectId,
@@ -16,9 +16,6 @@ const savedFacilitySchema = new mongoose.Schema(
     },
     shortDescription: {
       type: String,
-    },
-    contactIds: {
-      type: mongoose.Types.ObjectId,
     },
     annualRevenue: {
       type: String,
@@ -28,6 +25,9 @@ const savedFacilitySchema = new mongoose.Schema(
     },
     linkedInUrl: {
       type: String,
+    },
+    contactIds: {
+      type: mongoose.Types.ObjectId,
     },
     eventIds: {
       type: mongoose.Types.ObjectId,

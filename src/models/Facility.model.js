@@ -17,12 +17,14 @@ const facilitySchema = new mongoose.Schema(
     postalCode: {
       type: Number,
     },
+    //Profile url represent the google map url
     profileUrl: {
       type: String,
     },
     phoneNumber: {
       type: String,
     },
+    //Website url represent google map url
     websiteURL: {
       type: String,
     },
