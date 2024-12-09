@@ -16,8 +16,8 @@ const addUser = async (req, res, next) => {
   try {
     const body = JSON.parse(JSON.stringify(req.body));
     const { email } = body;
+
     const userExist = await User.findOne({ email });
-    console.log("The body", body);
     if (userExist) {
       return error409(res, "Email already registered with platform");
     }
@@ -32,7 +32,7 @@ const addUser = async (req, res, next) => {
   }
 };
 
-const loginUser = async (req, res) => {
+const loginUser = async (req, res, next) => {
   const { email } = req.body;
   try {
     const user = await User.findOne({ email });
@@ -64,7 +64,6 @@ const loginUser = async (req, res) => {
       );
 
       const responseUser = {
-        token,
         _id: user._id,
         name: user.fullName,
         email: user.email,

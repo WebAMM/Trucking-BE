@@ -1,30 +1,16 @@
 //Model
 const Facility = require("../../models/Facility.model.js");
-const SaleArea = require("../../models/SaleArea.model.js");
-const SavedFacility = require("../../models/SavedFacility.model.js");
+//Response and errors
+const { error404 } = require("../../services/helpers/errors.js");
+const { status200, success } = require("../../services/helpers/response.js");
+//Helpers
+const paginate = require("../../services/helpers/pagination.js");
+const { extractDomain } = require("../../services/helpers/extractDomain.js");
 const {
   bulkOrganizationEnrichment,
   singleOrganizationEnrichment,
   organizationContactList,
 } = require("../../services/helpers/apollo.js");
-//Response and errors
-const { error500, error404 } = require("../../services/helpers/errors.js");
-const { extractDomain } = require("../../services/helpers/extractDomain.js");
-const paginate = require("../../services/helpers/pagination.js");
-const { status200, success } = require("../../services/helpers/response.js");
-
-//To handle with Bulk API of Apollo.io
-
-// const extractDomain = (url) => {
-//   try {
-//     const hostname = new URL(url).hostname;
-//     // console.log("The hostman", hostname.replace(/^www\./, ""));
-//     // domains.push(hostname.replace(/^www\./, ""));
-//     return hostname.replace(/^www\./, "");
-//   } catch (err) {
-//     return "";
-//   }
-// };
 
 //All facilities
 const allFacility = async (req, res, next) => {
@@ -56,7 +42,48 @@ const allFacility = async (req, res, next) => {
   }
 };
 
-// const allFacility = async (req, res) => {
+const detailOfFacility = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const data = await Facility.findById(id).lean();
+
+    if (data) {
+      const organizationData = await singleOrganizationEnrichment(
+        data.websiteURL
+      );
+      const enrichedData = { ...data, ...organizationData };
+      return success(res, 200, "Success", enrichedData);
+    }
+    return error404(res, "No facility found");
+  } catch (err) {
+    return next(err);
+  }
+};
+
+const facilityContactList = async (req, res, next) => {
+  //orgId represents the organization orgId from Apollo
+  const { orgId } = req.params;
+  try {
+    const data = await organizationContactList(orgId);
+    return success(res, 200, "Success", data);
+  } catch (err) {
+    return next(err);
+  }
+};
+
+//To handle with Bulk API of Apollo.io
+// const extractDomain = (url) => {
+//   try {
+//     const hostname = new URL(url).hostname;
+//     // console.log("The hostman", hostname.replace(/^www\./, ""));
+//     // domains.push(hostname.replace(/^www\./, ""));
+//     return hostname.replace(/^www\./, "");
+//   } catch (err) {
+//     return "";
+//   }
+// };
+
+// const allFacility = async (req, res, next) => {
 //   const { page = 1, pageSize = 10, address } = req.query;
 //   try {
 //     const filter = address
@@ -100,131 +127,8 @@ const allFacility = async (req, res, next) => {
 //   }
 // };
 
-const detailOfFacility = async (req, res, next) => {
-  const { id } = req.params;
-  try {
-    const data = await Facility.findById(id).lean();
-
-    if (data) {
-      const organizationData = await singleOrganizationEnrichment(
-        data.websiteURL
-      );
-      const enrichedData = { ...data, ...organizationData };
-      return success(res, 200, "Success", enrichedData);
-    }
-    return error404(res, "No facility found");
-  } catch (err) {
-    return next(err);
-  }
-};
-
-const facilityContactList = async (req, res, next) => {
-  //orgId represents the organization orgId from Apollo
-  const { orgId } = req.params;
-  try {
-    const data = await organizationContactList(orgId);
-    return success(res, 200, "Success", data);
-  } catch (err) {
-    return next(err);
-  }
-};
-
-const saveFacility = async (req, res, next) => {
-  const { facilityId, saleAreaId, saleAreaName } = req.body;
-  try {
-    if (saleAreaId) {
-      const existSaleArea = await SaleArea.findById(saleAreaId);
-      if (existSaleArea) {
-        existSaleArea.facilityIds.push(facilityId);
-        await existSaleArea.save();
-        await SavedFacility.create({
-          facilityId: req.body.facilityId,
-          saleAreaId: req.body.existSaleArea._id,
-          userId: req.user._id,
-          shortDescription: req.body.shortDescription,
-          industry: req.body.industry,
-          linkedIn: req.body.linkedIn,
-        });
-      } else return error404(res, "No such sale area found");
-    } else if (saleAreaName) {
-      const newSaleArea = await SaleArea.create({
-        name: saleAreaName,
-        facilityIds: [facilityId],
-        status: "Active",
-      });
-      await SavedFacility.create({
-        facilityId: req.body.facilityId,
-        saleAreaId: newSaleArea._id.toString(),
-        userId: req.user._id,
-        shortDescription: req.body.shortDescription,
-        industry: req.body.industry,
-        linkedInUrl: req.body.linkedInUrl,
-      });
-    }
-
-    return status200(res, "Facility saved successfully");
-  } catch (err) {
-    return next(err);
-  }
-};
-
-const changeFacilityStatus = async (req, res, next) => {
-  const { id } = req.params;
-  const { status } = req.body;
-  console.log("The", req.body);
-  try {
-    const updatedFacility = await SavedFacility.findByIdAndUpdate(id, {
-      status,
-    });
-    if (updatedFacility) {
-      return status200(res, `Facility status updated to ${status}`);
-    }
-    return error404(res, "No facility found");
-  } catch (err) {
-    return next(err);
-  }
-};
-
-const attachSaleArea = async (req, res, next) => {
-  const { id } = req.params;
-  const { saleAreaId } = req.body;
-  try {
-    await SavedFacility.updateOne(
-      {
-        _id: id,
-      },
-      {
-        saleAreaId: saleAreaId,
-      }
-    );
-    return status200(res, "Sale area attached to the facility");
-  } catch (err) {
-    return next(err);
-  }
-};
-
-const allSavedFacilities = async (req, res, next) => {
-  try {
-    // const { data, totalRecords, totalPages, currentPage, limit } =
-    //   await paginate(SavedFacility, {}, page, pageSize);
-    const data = await SavedFacility.find({
-      userId: req.user._id,
-    }).populate({ path: "facilityId" });
-    if (data) {
-      return success(res, 200, "Saved facility", data);
-    }
-    return error404(res, "No saved facility found");
-  } catch (err) {
-    return next(err);
-  }
-};
-
 module.exports = {
   allFacility,
   detailOfFacility,
   facilityContactList,
-  saveFacility,
-  allSavedFacilities,
-  attachSaleArea,
-  changeFacilityStatus,
 };

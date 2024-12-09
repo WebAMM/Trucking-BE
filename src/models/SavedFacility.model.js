@@ -5,33 +5,45 @@ const savedFacilitySchema = new mongoose.Schema(
     facilityId: {
       type: mongoose.Types.ObjectId,
       ref: "Facility",
+      required: [true, "Facility id is required"],
     },
+    //After attaching the sale area
     saleAreaId: {
       type: mongoose.Types.ObjectId,
       ref: "SaleArea",
+      default: null,
     },
     userId: {
       type: mongoose.Types.ObjectId,
       ref: "User",
+      required: [true, "User id is required"],
     },
     shortDescription: {
       type: String,
+      default: null,
     },
     annualRevenue: {
-      type: String,
+      type: Number,
+      default: 0,
     },
     industry: {
       type: String,
+      default: null,
     },
     linkedInUrl: {
       type: String,
+      default: null,
     },
-    contactIds: {
-      type: mongoose.Types.ObjectId,
-    },
-    eventIds: {
-      type: mongoose.Types.ObjectId,
-    },
+    contactIds: [
+      {
+        type: mongoose.Types.ObjectId,
+        ref: "FacilityContact",
+      },
+    ],
+    // eventIds: {
+    //   type: mongoose.Types.ObjectId,
+    //   ref: "Event",
+    // },
     status: {
       type: String,
       enum: ["Active", "InActive"],

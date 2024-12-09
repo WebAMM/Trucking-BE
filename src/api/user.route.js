@@ -1,7 +1,7 @@
 const router = require("express").Router();
-//controller
+//controllers
 const userController = require("../controllers/user/user.controller");
-//helper
+//middlewares
 const { upload } = require("../services/helpers/fileHelper");
 
 //Add the user

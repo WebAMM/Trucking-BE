@@ -5,15 +5,19 @@ const userSchema = new mongoose.Schema(
   {
     fullName: {
       type: String,
+      required: [true, "FullName is required"],
     },
     email: {
       type: String,
+      required: [true, "Email is required"],
     },
     password: {
       type: String,
+      required: [true, "Password is required"],
     },
     phoneNo: {
       type: String,
+      required: [true, "PhoneNo is required"],
     },
     status: {
       type: String,
@@ -38,7 +42,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["SuperAdmin", "Admin", "User"],
       default: "User",
-      required: [true, "Please provide role"],
+      required: [true, "Role is required"],
     },
   },
   {
