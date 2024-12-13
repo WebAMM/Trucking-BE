@@ -43,8 +43,7 @@ const singleOrganizationEnrichment = async (domain) => {
     const response = await axios.request(options);
     return response.data.organization;
   } catch (err) {
-    console.error("Error enriching domain:", domain, err);
-    throw err; // Propagate the error
+    throw err;
   }
 };
 

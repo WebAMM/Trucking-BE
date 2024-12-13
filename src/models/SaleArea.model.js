@@ -27,7 +27,7 @@ const saleAreaSchema = new mongoose.Schema(
     // contactIds: [
     //   {
     //     type: mongoose.Types.ObjectId,
-    //     ref: "Contact",
+    //     ref: "FacilityContact",
     //   },
     // ],
     // noOfContacts: {

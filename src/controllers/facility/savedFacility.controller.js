@@ -1,61 +1,70 @@
 //Model
 const SavedFacility = require("../../models/SavedFacility.model");
 const SaleArea = require("../../models/SaleArea.model");
+const FacilityContact = require("../../models/FacilityContact.model.js");
 //Response and errors
 const { error404, error400 } = require("../../services/helpers/errors.js");
 const { status200, success } = require("../../services/helpers/response.js");
-const FacilityContact = require("../../models/FacilityContact.model.js");
 
 const saveFacility = async (req, res, next) => {
   const { facilitiesInfo, saleAreaId, saleAreaName, saleAreaNote } = req.body;
+
+  const loggedInUser = req.user;
+
   try {
-    const loggedInUser = req.user;
     if (saleAreaId && saleAreaName) {
       return error400(res, "Provide either saleAreaId or saleAreaName");
     }
-    if (saleAreaId) {
-      const existSaleArea = await SaleArea.findById(saleAreaId);
-      if (existSaleArea) {
-        for (let i = 0; i < facilitiesInfo.length; i++) {
-          const newSavedFacility = await SavedFacility.create({
-            ...facilitiesInfo[i],
-            facilityId: facilitiesInfo[i].facilityId,
-            saleAreaId: existSaleArea._id,
+
+    const createFacilities = async (saleArea, facilities) => {
+      const savedFacilities = await Promise.all(
+        facilities.map(async (facility) => {
+          const newFacility = await SavedFacility.create({
+            ...facility,
+            facilityId: facility.facilityId,
+            saleAreaId: saleArea._id.toString(),
             userId: loggedInUser._id,
           });
-          existSaleArea.savedFacilityIds.push(newSavedFacility._id.toString());
-          existSaleArea.totalSavedFacility += 1;
-        }
-        await existSaleArea.save();
-      } else return error404(res, "No such sale area found");
-    } else if (saleAreaName) {
+          saleArea.savedFacilityIds.push(newFacility._id.toString());
+          saleArea.totalSavedFacility += 1;
+        })
+      );
+      await saleArea.save();
+      return savedFacilities;
+    };
+
+    if (saleAreaId) {
+      const saleArea = await SaleArea.findById(saleAreaId);
+      if (!saleArea) {
+        return error404(res, "Sale area not found");
+      }
+      await createFacilities(saleArea, facilitiesInfo);
+      return status200(res, "Facilities saved successfully in sale area");
+    }
+
+    if (saleAreaName) {
       const newSaleArea = await SaleArea.create({
         name: saleAreaName,
         userId: loggedInUser._id,
         note: saleAreaNote,
       });
-      for (let i = 0; i < facilitiesInfo.length; i++) {
-        const newSavedFacility = await SavedFacility.create({
-          ...facilitiesInfo[i],
-          facilityId: facilitiesInfo[i].facilityId,
-          saleAreaId: newSaleArea._id.toString(),
-          userId: loggedInUser._id,
-        });
-        newSaleArea.savedFacilityIds.push(newSavedFacility._id.toString());
-        newSaleArea.totalSavedFacility += 1;
-      }
-      await newSaleArea.save();
-    } else {
-      for (let i = 0; i < facilitiesInfo.length; i++) {
+
+      await createFacilities(newSaleArea, facilitiesInfo);
+      return status200(res, "Facilities saved in new sale area");
+    }
+
+    await Promise.all(
+      facilitiesInfo.map(async (facility) => {
         await SavedFacility.create({
-          ...facilitiesInfo[i],
-          facilityId: facilitiesInfo[i].facilityId,
+          ...facility,
+          facilityId: facility.facilityId,
           saleAreaId: null,
           userId: loggedInUser._id,
         });
-      }
-    }
-    return status200(res, "Facility saved successfully");
+      })
+    );
+
+    return status200(res, "Facilities saved successfully");
   } catch (err) {
     return next(err);
   }
@@ -138,13 +147,13 @@ const changeFacilityStatus = async (req, res, next) => {
 };
 
 const addContact = async (req, res, next) => {
-  const { savedFacilityId } = req.body;
+  const { id } = req.params;
   try {
-    const existsFacility = await SavedFacility.findById(savedFacilityId);
+    const existsFacility = await SavedFacility.findById(id);
     if (existsFacility) {
       const newContact = await FacilityContact.create({
         ...req.body,
-        savedFacilityId: savedFacilityId,
+        savedFacilityId: id,
       });
       existsFacility.contactIds.push(newContact._id.toString());
       await existsFacility.save();
@@ -163,6 +172,7 @@ const detailOfSavedFacility = async (req, res, next) => {
       .select("-__v -facilityId -userId -saleAreaId")
       .populate({
         path: "contactIds",
+        match: { status: "Active" },
         select: "-__v -savedFacilityId",
       });
     if (data) {

@@ -2,11 +2,7 @@
 const SaleArea = require("../../models/SaleArea.model.js");
 const SavedFacility = require("../../models/SavedFacility.model.js");
 //Response and errors
-const {
-  error500,
-  error404,
-  error400,
-} = require("../../services/helpers/errors.js");
+const { error404, error400 } = require("../../services/helpers/errors.js");
 const { status200, success } = require("../../services/helpers/response.js");
 
 const getSalesArea = async (req, res, next) => {

@@ -8,6 +8,12 @@ router.post("/add", verifyToken, savedFacilityController.saveFacility);
 
 router.get("/all", verifyToken, savedFacilityController.allSavedFacilities);
 
+router.get(
+  "/detail/:id",
+  verifyToken,
+  savedFacilityController.detailOfSavedFacility
+);
+
 router.put("/attach/:id", verifyToken, savedFacilityController.attachSaleArea);
 
 router.patch(
@@ -16,13 +22,7 @@ router.patch(
   savedFacilityController.changeFacilityStatus
 );
 
-router.post("/add-contact", verifyToken, savedFacilityController.addContact);
-
-router.get(
-  "/detail/:id",
-  verifyToken,
-  savedFacilityController.detailOfSavedFacility
-);
+router.post("/add-contact/:id", verifyToken, savedFacilityController.addContact);
 
 router.put(
   "/edit-contact/:id",
