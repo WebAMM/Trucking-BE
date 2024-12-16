@@ -37,12 +37,16 @@ const allContact = async (req, res) => {
 const detailOfContact = async (req, res) => {
   const { id } = req.params;
   try {
-    const data = await FacilityContact.findById(id).populate({
-      path: "savedFacilityId",
-      populate: {
-        path: "facilityId",
-      },
-    });
+    const data = await FacilityContact.findById(id)
+      .populate({
+        path: "savedFacilityId",
+        select: "-saleAreaId -userId -contactIds -__v",
+        populate: {
+          path: "facilityId",
+          select: "-latitude -longitude",
+        },
+      })
+      .select("-__v");
     if (data) {
       return success(res, 200, "All contacts", data);
     }

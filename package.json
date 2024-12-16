@@ -7,7 +7,7 @@
     "start": "nodemon ./src/app.js"
   },
   "keywords": [],
-  "author": "SiliconNexus",
+  "author": "Suleman",
   "license": "ISC",
   "description": "",
   "dependencies": {

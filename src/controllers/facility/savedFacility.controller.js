@@ -169,12 +169,17 @@ const detailOfSavedFacility = async (req, res, next) => {
   const { id } = req.params;
   try {
     const data = await SavedFacility.findById(id)
-      .select("-__v -facilityId -userId -saleAreaId")
-      .populate({
-        path: "contactIds",
-        match: { status: "Active" },
-        select: "-__v -savedFacilityId",
-      });
+      .select("-__v -userId -saleAreaId")
+      .populate([
+        {
+          path: "contactIds",
+          match: { status: "Active" },
+          select: "-__v -savedFacilityId",
+        },
+        {
+          path: "facilityId",
+        },
+      ]);
     if (data) {
       return success(res, 200, "Detail of facility", data);
     }

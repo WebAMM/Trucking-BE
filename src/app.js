@@ -9,7 +9,6 @@ const app = express();
 require("dotenv").config();
 
 //Middlewares
-const multer = require("multer");
 const { errorHandler } = require("./middlewares/errorHandler");
 appMiddlewares(app);
 require("express-async-errors");

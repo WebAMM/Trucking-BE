@@ -11,5 +11,6 @@ module.exports = {
   gmail_app_user: process.env.GMAIL_APP_USER,
   forgot_password_key: process.env.FORGOT_PASSWORD_KEY,
   apollo_url: process.env.APOLLO_URL,
-  apollo_api_key: process.env.APOLLO_X_API_KEY,
+  apollo_org_api_key: process.env.APOLLO_ORG_API_KEY,
+  apollo_people_api_key: process.env.APOLLO_PEOPLE_API_KEY,
 };

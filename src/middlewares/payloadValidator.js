@@ -1,4 +1,3 @@
-//imports from packages
 const { body, check, validationResult } = require("express-validator");
 
 const validateLogin = [

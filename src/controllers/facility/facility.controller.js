@@ -9,7 +9,8 @@ const { extractDomain } = require("../../services/helpers/extractDomain.js");
 const {
   bulkOrganizationEnrichment,
   singleOrganizationEnrichment,
-  organizationContactList,
+  peopleEnrichment,
+  peopleSearch,
 } = require("../../services/helpers/apollo.js");
 
 //All facilities
@@ -42,7 +43,9 @@ const allFacility = async (req, res, next) => {
   }
 };
 
+//Detail of facility, enriching the data from apollo
 const detailOfFacility = async (req, res, next) => {
+  //Id in params of facility
   const { id } = req.params;
   try {
     const data = await Facility.findById(id).lean();
@@ -60,11 +63,24 @@ const detailOfFacility = async (req, res, next) => {
   }
 };
 
-const facilityContactList = async (req, res, next) => {
+//People Search API of Apollo
+const facilitySearchPeople = async (req, res, next) => {
   //orgId represents the organization orgId from Apollo
   const { orgId } = req.params;
   try {
-    const data = await organizationContactList(orgId);
+    const data = await peopleSearch(orgId);
+    return success(res, 200, "Success", data);
+  } catch (err) {
+    return next(err);
+  }
+};
+
+//People Enrichment API of Apollo
+const facilityPeopleEnrichment = async (req, res, next) => {
+  //orgId represents the person id from Apollo People Search
+  const { peopleId } = req.params;
+  try {
+    const data = await peopleEnrichment(peopleId);
     return success(res, 200, "Success", data);
   } catch (err) {
     return next(err);
@@ -130,5 +146,6 @@ const facilityContactList = async (req, res, next) => {
 module.exports = {
   allFacility,
   detailOfFacility,
-  facilityContactList,
+  facilitySearchPeople,
+  facilityPeopleEnrichment,
 };

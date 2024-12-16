@@ -1,10 +1,13 @@
 const axios = require("axios");
-const { apollo_url, apollo_api_key } = require("../../config");
+const {
+  apollo_url,
+  apollo_org_api_key,
+  apollo_people_api_key,
+} = require("../../config");
 
 const bulkOrganizationEnrichment = async (domains) => {
   const baseUrl = `${apollo_url}/organizations/bulk_enrich`;
   try {
-    console.log("The domains", domains);
     const queryParams = domains
       .map((domain) => `domains[]=${domain}`)
       .join(`&`);
@@ -16,12 +19,11 @@ const bulkOrganizationEnrichment = async (domains) => {
         accept: "application/json",
         "Cache-Control": "no-cache",
         "Content-Type": "application/json",
-        "x-api-key": apollo_api_key,
+        "x-api-key": apollo_org_api_key,
       },
     };
     const response = await axios.request(options);
-    console.log("The response", response.data.organizations);
-    return response.data.organizations;
+    return response?.data?.organizations;
   } catch (err) {
     throw err;
   }
@@ -37,17 +39,17 @@ const singleOrganizationEnrichment = async (domain) => {
         accept: "application/json",
         "Cache-Control": "no-cache",
         "Content-Type": "application/json",
-        "x-api-key": apollo_api_key, // Ensure the API key is valid
+        "x-api-key": apollo_org_api_key,
       },
     };
     const response = await axios.request(options);
-    return response.data.organization;
+    return response?.data?.organization;
   } catch (err) {
     throw err;
   }
 };
 
-const organizationContactList = async (orgId) => {
+const peopleSearch = async (orgId) => {
   const baseUrl = `${apollo_url}/mixed_people/search?organization_ids[]=${orgId}`;
   try {
     const options = {
@@ -57,13 +59,50 @@ const organizationContactList = async (orgId) => {
         accept: "application/json",
         "Cache-Control": "no-cache",
         "Content-Type": "application/json",
-        "x-api-key": "Vkd7rdywhd0q9qVGQ9Uvag",
+        "x-api-key": apollo_people_api_key,
       },
     };
     const response = await axios.request(options);
-    return response.data.contacts;
+    const modifiedResponse =
+      response?.data &&
+      response?.data?.people?.length &&
+      response?.data?.people.map((person) => {
+        return {
+          peopleId: person?.id,
+          contactName: person?.name,
+          title: person?.title,
+          linkedInUrl: person?.linkedin_url,
+          organizationName: person?.organization?.name,
+          // phone: person?.organization.phone,
+        };
+      });
+    return modifiedResponse;
   } catch (err) {
-    console.log("The err", err);
+    throw err;
+  }
+};
+
+const peopleEnrichment = async (peopleId) => {
+  const baseUrl = `${apollo_url}/people/match?id=${peopleId}`;
+  try {
+    const options = {
+      method: "POST",
+      url: baseUrl,
+      headers: {
+        accept: "application/json",
+        "Cache-Control": "no-cache",
+        "Content-Type": "application/json",
+        "x-api-key": apollo_people_api_key,
+      },
+    };
+    const response = await axios.request(options);
+    const modifiedResponse = {
+      email: response?.data?.person?.email,
+      phone: response?.data?.person?.organization?.phone,
+      location: response?.data?.person?.organization?.raw_address,
+    };
+    return modifiedResponse;
+  } catch (err) {
     throw err;
   }
 };
@@ -71,5 +110,6 @@ const organizationContactList = async (orgId) => {
 module.exports = {
   bulkOrganizationEnrichment,
   singleOrganizationEnrichment,
-  organizationContactList,
+  peopleSearch,
+  peopleEnrichment,
 };
