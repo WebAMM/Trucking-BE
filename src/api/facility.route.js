@@ -12,6 +12,9 @@ router.get("/detail/:id", facilityController.detailOfFacility);
 router.get("/search-people/:orgId", facilityController.facilitySearchPeople);
 
 //Company contact list, using the people enrichment Api of Apollo
-router.get("/people-enrichment/:peopleId", facilityController.facilityPeopleEnrichment);
+router.get(
+  "/people-enrichment/:peopleId",
+  facilityController.facilityPeopleEnrichment
+);
 
 module.exports = router;

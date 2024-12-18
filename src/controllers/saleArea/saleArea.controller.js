@@ -5,39 +5,87 @@ const SavedFacility = require("../../models/SavedFacility.model.js");
 const { error404, error400 } = require("../../services/helpers/errors.js");
 const { status200, success } = require("../../services/helpers/response.js");
 
+//Get all the sales area of a user
 const getSalesArea = async (req, res, next) => {
+  const { page = 1, pageSize = 10 } = req.query;
   const loggedInUser = req.user;
   try {
-    const data = await SaleArea.find({ userId: loggedInUser._id }).select(
-      "-__v -userId -savedFacilityIds"
-    );
-    return success(res, 200, "All sales area", data);
+    const currentPage = parseInt(page);
+    const pageLimit = parseInt(pageSize);
+    const skip = (currentPage - 1) * pageLimit;
+
+    const data = await SaleArea.find({ userId: loggedInUser._id })
+      .select("-__v -userId -savedFacilityIds")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(pageLimit);
+
+    const totalData = await SaleArea.countDocuments({
+      userId: loggedInUser._id,
+    });
+
+    const totalPages = Math.ceil(totalData / pageLimit);
+
+    const response = {
+      data,
+      pagination: {
+        totalItems: totalData,
+        totalPages,
+        currentPage,
+        limit: pageLimit,
+      },
+    };
+
+    return success(res, 200, "All sales area", response);
   } catch (err) {
     return next(err);
   }
 };
 
+//Get all the facilities of the sale area of a user
 const getAllFacilities = async (req, res, next) => {
+  const { page = 1, pageSize = 10 } = req.query;
   const { id } = req.params;
   const loggedInUser = req.user;
   try {
+    const currentPage = parseInt(page);
+    const pageLimit = parseInt(pageSize);
+    const skip = (currentPage - 1) * pageLimit;
+
     const data = await SavedFacility.find({
       saleAreaId: id,
       userId: loggedInUser._id,
     })
-      .select("-__v -userId")
+      .select("-__v -userId -contactIds")
       .populate({
         path: "facilityId",
-      });
-    // if (!data) {
-    //   return error404(res, "No such sale area found");
-    // }
-    return success(res, 200, "All facilities of sale area", data);
+      })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(pageLimit);
+
+    const totalData = await SavedFacility.countDocuments({
+      userId: loggedInUser._id,
+    });
+
+    const totalPages = Math.ceil(totalData / pageSize);
+
+    const response = {
+      data,
+      pagination: {
+        totalItems: totalData,
+        totalPages,
+        currentPage,
+        limit: pageLimit,
+      },
+    };
+    return success(res, 200, "Facilities inside sale area", response);
   } catch (err) {
     return next(err);
   }
 };
 
+//Change the status of the sale area
 const changeStatus = async (req, res, next) => {
   const { id } = req.params;
   const { status } = req.body;

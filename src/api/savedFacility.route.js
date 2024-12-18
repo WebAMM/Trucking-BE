@@ -28,7 +28,11 @@ router.patch(
 );
 
 //Add contact to the user specific saved facility, /:id for saved facility id
-router.post("/add-contact/:id", verifyToken, savedFacilityController.addContact);
+router.post(
+  "/add-contact/:id",
+  verifyToken,
+  savedFacilityController.addContact
+);
 
 //Edit the contact to the user specific saved facility, /:id for saved facility id
 router.put(

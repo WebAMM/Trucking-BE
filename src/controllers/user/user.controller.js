@@ -12,6 +12,7 @@ const jwt = require("jsonwebtoken");
 const bcryptjs = require("bcryptjs");
 const config = require("../../config/index");
 
+//Add the user, admin add the user
 const addUser = async (req, res, next) => {
   try {
     const body = JSON.parse(JSON.stringify(req.body));
@@ -32,6 +33,7 @@ const addUser = async (req, res, next) => {
   }
 };
 
+//User login
 const loginUser = async (req, res, next) => {
   const { email } = req.body;
   try {

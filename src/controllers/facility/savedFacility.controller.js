@@ -6,6 +6,7 @@ const FacilityContact = require("../../models/FacilityContact.model.js");
 const { error404, error400 } = require("../../services/helpers/errors.js");
 const { status200, success } = require("../../services/helpers/response.js");
 
+//Save the facility for the user
 const saveFacility = async (req, res, next) => {
   const { facilitiesInfo, saleAreaId, saleAreaName, saleAreaNote } = req.body;
 
@@ -16,6 +17,7 @@ const saveFacility = async (req, res, next) => {
       return error400(res, "Provide either saleAreaId or saleAreaName");
     }
 
+    //To add the facilities
     const createFacilities = async (saleArea, facilities) => {
       const savedFacilities = await Promise.all(
         facilities.map(async (facility) => {
@@ -70,29 +72,52 @@ const saveFacility = async (req, res, next) => {
   }
 };
 
+//All the saved facilities for the user
 const allSavedFacilities = async (req, res, next) => {
+  const { page = 1, pageSize = 10 } = req.query;
   try {
-    // const { data, totalRecords, totalPages, currentPage, limit } =
-    //   await paginate(SavedFacility, {}, page, pageSize);
     const loggedInUser = req.user;
+    const currentPage = parseInt(page);
+    const pageLimit = parseInt(pageSize);
+    const skip = (currentPage - 1) * pageLimit;
+
     const data = await SavedFacility.find({
       userId: loggedInUser._id,
     })
-      .select("-__v -userId")
+      .select("-__v -userId -contactIds")
       .populate([
         { path: "facilityId" },
         {
           path: "saleAreaId",
           select: "_id name",
         },
-      ]);
+      ])
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(pageLimit);
 
-    return success(res, 200, "Saved facility", data);
+    const totalData = await SavedFacility.countDocuments({
+      userId: loggedInUser._id,
+    });
+
+    const totalPages = Math.ceil(totalData / pageLimit);
+
+    const response = {
+      data,
+      pagination: {
+        totalItems: totalData,
+        totalPages,
+        currentPage,
+        limit: pageLimit,
+      },
+    };
+    return success(res, 200, "Saved facility", response);
   } catch (err) {
     return next(err);
   }
 };
 
+//Attach the sale area to the saved facility
 const attachSaleArea = async (req, res, next) => {
   const { id } = req.params;
   const { saleAreaId } = req.body;
@@ -121,6 +146,7 @@ const attachSaleArea = async (req, res, next) => {
   }
 };
 
+//Change the saved facility status [Active/Inactive]
 const changeFacilityStatus = async (req, res, next) => {
   const { id } = req.params;
   const { status } = req.body;
@@ -146,25 +172,7 @@ const changeFacilityStatus = async (req, res, next) => {
   }
 };
 
-const addContact = async (req, res, next) => {
-  const { id } = req.params;
-  try {
-    const existsFacility = await SavedFacility.findById(id);
-    if (existsFacility) {
-      const newContact = await FacilityContact.create({
-        ...req.body,
-        savedFacilityId: id,
-      });
-      existsFacility.contactIds.push(newContact._id.toString());
-      await existsFacility.save();
-      return status200(res, "Facility contact added successfully");
-    }
-    return error404(res, "No such saved facility found");
-  } catch (err) {
-    return next(err);
-  }
-};
-
+//Detail of the saved facility
 const detailOfSavedFacility = async (req, res, next) => {
   const { id } = req.params;
   try {
@@ -189,6 +197,27 @@ const detailOfSavedFacility = async (req, res, next) => {
   }
 };
 
+//Add the contacts inside the saved facility
+const addContact = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const existsFacility = await SavedFacility.findById(id);
+    if (existsFacility) {
+      const newContact = await FacilityContact.create({
+        ...req.body,
+        savedFacilityId: id,
+      });
+      existsFacility.contactIds.push(newContact._id.toString());
+      await existsFacility.save();
+      return status200(res, "Facility contact added successfully");
+    }
+    return error404(res, "No such saved facility found");
+  } catch (err) {
+    return next(err);
+  }
+};
+
+//Edit the contact in the saved facility
 const editContact = async (req, res, next) => {
   const { id } = req.params;
   try {

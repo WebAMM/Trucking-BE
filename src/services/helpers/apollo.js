@@ -23,7 +23,21 @@ const bulkOrganizationEnrichment = async (domains) => {
       },
     };
     const response = await axios.request(options);
-    return response?.data?.organizations;
+    const modifiedResponse =
+      response?.data &&
+      response?.data?.organizations?.length &&
+      response?.data?.organizations?.map((org) => {
+        return {
+          orgId: org?.id,
+          orgName: org?.name,
+          websiteUrl: org?.website_url,
+          linkedInUrl: org?.linkedin_url,
+          phoneNo: org?.phone,
+          industry: org?.industry,
+          shortDescription: org?.short_description,
+        };
+      });
+    return modifiedResponse;
   } catch (err) {
     throw err;
   }
@@ -43,7 +57,17 @@ const singleOrganizationEnrichment = async (domain) => {
       },
     };
     const response = await axios.request(options);
-    return response?.data?.organization;
+    const modifiedResponse = {
+      orgId: response?.data?.organization?.id,
+      orgName: response?.data?.organization?.website_url,
+      linkedInUrl: response?.data?.organization?.linkedin_url,
+      industry: response?.data?.organization?.industry,
+      annualRevenuePrinted:
+        response?.data?.organization?.annual_revenue_printed,
+      annualRevenue: response?.data?.organization?.annual_revenue,
+      shortDescription: response?.data?.organization?.short_description,
+    };
+    return modifiedResponse;
   } catch (err) {
     throw err;
   }
@@ -99,7 +123,7 @@ const peopleEnrichment = async (peopleId) => {
     const modifiedResponse = {
       email: response?.data?.person?.email,
       phone: response?.data?.person?.organization?.phone,
-      location: response?.data?.person?.organization?.raw_address,
+      location: response?.data?.contact?.present_raw_address,
     };
     return modifiedResponse;
   } catch (err) {
