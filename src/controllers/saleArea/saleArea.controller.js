@@ -7,22 +7,32 @@ const { status200, success } = require("../../services/helpers/response.js");
 
 //Get all the sales area of a user
 const getSalesArea = async (req, res, next) => {
-  const { page = 1, pageSize = 10 } = req.query;
+  const { page = 1, pageSize = 10, text, status } = req.query;
   const loggedInUser = req.user;
   try {
     const currentPage = parseInt(page);
     const pageLimit = parseInt(pageSize);
     const skip = (currentPage - 1) * pageLimit;
+    //Search based on name and status of sale area according to logged in user
+    let query = {
+      userId: loggedInUser._id,
+    };
 
-    const data = await SaleArea.find({ userId: loggedInUser._id })
+    if (text) {
+      query.name = { $regex: text, $options: "i" };
+    }
+
+    if (status) {
+      query.status = status;
+    }
+
+    const data = await SaleArea.find(query)
       .select("-__v -userId -savedFacilityIds")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(pageLimit);
 
-    const totalData = await SaleArea.countDocuments({
-      userId: loggedInUser._id,
-    });
+    const totalData = await SaleArea.countDocuments(query);
 
     const totalPages = Math.ceil(totalData / pageLimit);
 
