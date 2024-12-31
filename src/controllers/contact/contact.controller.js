@@ -1,9 +1,10 @@
 //Model
+const Facility = require("../../models/Facility.model.js");
 const FacilityContact = require("../../models/FacilityContact.model");
 const SavedFacility = require("../../models/SavedFacility.model.js");
 //Response and errors
 const { error404, error400 } = require("../../services/helpers/errors.js");
-const { status200, success } = require("../../services/helpers/response.js");
+const { status200, success, success201 } = require("../../services/helpers/response.js");
 
 const allContact = async (req, res) => {
   const loggedInUser = req.user;
@@ -56,7 +57,29 @@ const detailOfContact = async (req, res) => {
   }
 };
 
+const createContact = async (req, res, next) => {
+  console.log(123456789);
+
+  try {
+    const { savedFacilityId, name, title, email, phoneNo, company, linkedIn, pipelineId, addedFrom, location } = req.body;
+    let facility = await Facility.findById(savedFacilityId)
+    if (!facility) {
+      return error404(res, "Facility not found");
+    }
+
+    let userId = req.user._id
+    const facilityContact = await FacilityContact.create({
+      userId, name, title, email, phoneNo, company, linkedIn, pipelineId, addedFrom, location, savedFacilityId
+    })
+
+    success201(res, 201, "Contact created successfully.", facilityContact)
+  } catch (err) {
+    return next(err);
+  }
+};
+
 module.exports = {
+  createContact,
   allContact,
   detailOfContact,
 };

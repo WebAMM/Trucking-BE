@@ -6,6 +6,9 @@ const saleAreaSchema = new mongoose.Schema(
       type: String,
       required: [true, "Name is required"],
     },
+    note: {
+      type: String,
+    },
     userId: {
       type: mongoose.Types.ObjectId,
       ref: "User",
@@ -17,13 +20,10 @@ const saleAreaSchema = new mongoose.Schema(
         ref: "SavedFacility",
       },
     ],
-    totalSavedFacility: {
-      type: Number,
-      default: 0,
-    },
-    note: {
-      type: String,
-    },
+    // totalSavedFacility: {
+    //   type: Number,
+    //   default: 0,
+    // },
     // contactIds: [
     //   {
     //     type: mongoose.Types.ObjectId,

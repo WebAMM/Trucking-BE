@@ -1,4 +1,6 @@
+const mongoose = require('mongoose');
 //Model
+const Facility = require("../../models/Facility.model.js");
 const SaleArea = require("../../models/SaleArea.model.js");
 const SavedFacility = require("../../models/SavedFacility.model.js");
 //Response and errors
@@ -115,6 +117,41 @@ const changeStatus = async (req, res, next) => {
   }
 };
 
+//Change the status of the sale area
+const createSaleArea = async (req, res, next) => {
+  const { name, note, savedFacilityIds } = req.body;
+
+  try {
+    const saleArea = await SaleArea.create({ userId: req.user._id, name, note });
+
+    if (savedFacilityIds) {
+      for (const id of savedFacilityIds) {
+        const facility = await Facility.findById(id);
+        if (!facility) {
+          return error404(res, "Facility not found");
+        }
+      }
+
+      // Add facility ids
+      const updatedSaleArea = await SaleArea.findByIdAndUpdate(
+        saleArea._id,
+        { $push: { savedFacilityIds: { $each: savedFacilityIds } } },
+        { new: true }
+      );
+    }
+
+    return status200(
+      res,
+      `New sale area created successfully`
+    );
+
+  } catch (err) {
+    // Catch errors and pass them to the next middleware (for error handling)
+    return next(err);
+  }
+};
+
+
 //Attach sales area
 // const createSaleArea = async (req, res, next) => {
 //   const { facilityId, saleAreaId, name } = req.body;
@@ -143,7 +180,7 @@ const changeStatus = async (req, res, next) => {
 // };
 
 module.exports = {
-  // createSaleArea,
+  createSaleArea,
   getSalesArea,
   getAllFacilities,
   changeStatus,

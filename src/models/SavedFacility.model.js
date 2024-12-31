@@ -40,6 +40,24 @@ const savedFacilitySchema = new mongoose.Schema(
         ref: "FacilityContact",
       },
     ],
+    docs: [{
+      name: {
+        type: String,
+        required: [true, "Name of picture is required"],
+      },
+      format: {
+        type: String,
+        required: [true, "Format of picture is required"],
+      },
+      location: {
+        type: String,
+        required: [true, "Location of picture is required"],
+      },
+      key: {
+        type: String,
+        required: [true, "Key of picture is required"],
+      },
+    }],
     // eventIds: {
     //   type: mongoose.Types.ObjectId,
     //   ref: "Event",

@@ -3,6 +3,10 @@ const router = require("express").Router();
 const saleAreaController = require("../controllers/saleArea/saleArea.controller");
 //middlewares
 const { verifyToken } = require("../middlewares/auth.middleware");
+const { validateCreateSaleArea } = require("../middlewares/saleAreaValidator");
+
+//Create sales area
+router.post("/create", verifyToken, validateCreateSaleArea, saleAreaController.createSaleArea);
 
 //Get all the sales area
 router.get("/all", verifyToken, saleAreaController.getSalesArea);

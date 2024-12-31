@@ -11,6 +11,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Email is required"],
     },
+    company: {
+      type: String,
+      required: [true, "Company is required"],
+    },
+    title: {
+      type: String,
+      required: [true, "Title is required"],
+    },
     password: {
       type: String,
       required: [true, "Password is required"],
@@ -18,6 +26,20 @@ const userSchema = new mongoose.Schema(
     phoneNo: {
       type: String,
       required: [true, "PhoneNo is required"],
+    },
+    gender: {
+      type: String,
+      required: [true, "Gender is required"],
+      enum: ["Male", "Female", "Other"],
+      default: "Male"
+    },
+    dob: {
+      type: String,
+      required: [true, "DOB is required"],
+    },
+    country: {
+      type: String,
+      required: [true, "Country is required"],
     },
     status: {
       type: String,
@@ -45,9 +67,7 @@ const userSchema = new mongoose.Schema(
       required: [true, "Role is required"],
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 userSchema.pre("save", async function save(next) {

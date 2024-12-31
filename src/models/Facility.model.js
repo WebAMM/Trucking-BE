@@ -6,49 +6,49 @@ const facilitySchema = new mongoose.Schema(
       type: String,
       required: [true, "Name is required"],
     },
-    streetAddress: {
+    industry: {
       type: String,
-      required: [true, "StreetAddress is required"],
+      required: [true, "Industry is required"],
     },
-    city: {
+    description: {
       type: String,
-      required: [true, "City is required"],
-    },
-    state: {
-      type: String,
-      required: [true, "State is required"],
-    },
-    postalCode: {
-      type: Number,
-      required: [true, "PostalCode is required"],
-    },
-    //Profile url represent the google map url
-    profileUrl: {
-      type: String,
-      required: [true, "ProfileUrl is required"],
+      required: [true, "Description is required"],
     },
     phoneNumber: {
       type: String,
       required: [true, "PhoneNumber is required"],
     },
     //Website url represent google map url
-    websiteURL: {
+    companyURL: {
       type: String,
-      required: [true, "WebsiteURL is required"],
+      required: [true, "CompanyURL is required"],
     },
-    longitude: {
+    linkedin: {
       type: String,
-      required: [true, "Longitude is required"],
+      required: [true, "Linkedin is required"],
     },
-    latitude: {
+    revenue: {
+      type: Number,
+      required: [true, "Revenue is required"],
+    },
+    //Profile url represent the google map url
+    address: {
       type: String,
-      required: [true, "Latitude is required"],
+      required: [true, "Address is required"],
+    },
+    saleAreaId: { type: mongoose.Schema.Types.ObjectId, ref: "SaleArea" },
+    meetingNotes: { type: String },
+    location: {
+      // Geo JSON Object
+      type: { type: String, default: "Point" },
+      coordinates: { type: [Number], default: [0.0, 0.0] },
+      address: String,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
+
+facilitySchema.index({ location: "2dsphere" });
 
 const Facility = mongoose.model("Facility", facilitySchema);
 module.exports = Facility;

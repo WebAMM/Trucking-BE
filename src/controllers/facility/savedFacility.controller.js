@@ -74,16 +74,16 @@ const saveFacility = async (req, res, next) => {
 
 //All the saved facilities for the user
 const allSavedFacilities = async (req, res, next) => {
-  const { page = 1, pageSize = 10 } = req.query;
+  const { page = 1, pageSize = 10, text, status } = req.query;
   try {
     const loggedInUser = req.user;
+    filter = { userId: loggedInUser._id }
     const currentPage = parseInt(page);
     const pageLimit = parseInt(pageSize);
     const skip = (currentPage - 1) * pageLimit;
+    if (status) { filter.status = status }
 
-    const data = await SavedFacility.find({
-      userId: loggedInUser._id,
-    })
+    let data = await SavedFacility.find(filter)
       .select("-__v -userId -contactIds")
       .populate([
         { path: "facilityId" },
@@ -95,6 +95,13 @@ const allSavedFacilities = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(pageLimit);
+
+    data = data.filter(d => {
+      const searchRegex = new RegExp(text, "i");
+      const name = searchRegex.test(d.facilityId.name);
+
+      return name
+    });
 
     const totalData = await SavedFacility.countDocuments({
       userId: loggedInUser._id,
@@ -122,15 +129,20 @@ const attachSaleArea = async (req, res, next) => {
   const { id } = req.params;
   const { saleAreaId } = req.body;
   try {
+    let existing = await SaleArea.findOne({
+      _id: saleAreaId,
+      savedFacilityIds: { $in: [id] }
+    });
+
+    if (existing) {
+      return error400(res, "This sale area has already been assigned to this facility.");
+    }
+
     const existsSaleArea = await SaleArea.findById(saleAreaId);
     if (existsSaleArea) {
       const existFacility = await SavedFacility.findByIdAndUpdate(
-        {
-          _id: id,
-        },
-        {
-          saleAreaId,
-        }
+        { _id: id, },
+        { saleAreaId, }
       );
       if (existFacility) {
         existsSaleArea.savedFacilityIds.push(id);
