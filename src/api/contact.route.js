@@ -14,4 +14,10 @@ router.get("/detail/:id", verifyToken, contactController.detailOfContact);
 //Create contact
 router.post("/create", verifyToken, validateCreateContact, contactController.createContact);
 
+//Update contact, here id represent to contact id
+router.patch("/update/:id", verifyToken, contactController.updateContact);
+
+//Update contact and attach pipeline, here id represent to contact id
+router.patch("/attachPipeline/:id", verifyToken, contactController.attachPipeline);
+
 module.exports = router;

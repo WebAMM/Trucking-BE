@@ -165,12 +165,8 @@ const changeFacilityStatus = async (req, res, next) => {
   try {
     const updatedFacility = await SavedFacility.findByIdAndUpdate(
       id,
-      {
-        status,
-      },
-      {
-        new: true,
-      }
+      { status },
+      { new: true }
     );
     if (updatedFacility) {
       return status200(

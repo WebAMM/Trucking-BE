@@ -2,6 +2,7 @@
 const Facility = require("../../models/Facility.model.js");
 const FacilityContact = require("../../models/FacilityContact.model");
 const SavedFacility = require("../../models/SavedFacility.model.js");
+const Pipeline = require('./../../models/Pipeline.model.js')
 //Response and errors
 const { error404, error400 } = require("../../services/helpers/errors.js");
 const { status200, success, success201 } = require("../../services/helpers/response.js");
@@ -58,10 +59,8 @@ const detailOfContact = async (req, res) => {
 };
 
 const createContact = async (req, res, next) => {
-  console.log(123456789);
-
   try {
-    const { savedFacilityId, name, title, email, phoneNo, company, linkedIn, pipelineId, addedFrom, location } = req.body;
+    const { savedFacilityId, name, title, email, phoneNo, company, linkedIn, addedFrom, location } = req.body;
     let facility = await Facility.findById(savedFacilityId)
     if (!facility) {
       return error404(res, "Facility not found");
@@ -69,10 +68,49 @@ const createContact = async (req, res, next) => {
 
     let userId = req.user._id
     const facilityContact = await FacilityContact.create({
-      userId, name, title, email, phoneNo, company, linkedIn, pipelineId, addedFrom, location, savedFacilityId
+      userId, name, title, email, phoneNo, company, linkedIn, addedFrom, location, savedFacilityId
     })
 
     success201(res, 201, "Contact created successfully.", facilityContact)
+  } catch (err) {
+    return next(err);
+  }
+};
+
+const updateContact = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    let contact = await FacilityContact.findById(id)
+    if (!contact) {
+      return error404(res, "Contact not found");
+    }
+
+    const facilityContact = await FacilityContact.findByIdAndUpdate(id, { ...req.body }, { new: true })
+
+    success(res, 200, "Contact updated successfully.", facilityContact)
+  } catch (err) {
+    return next(err);
+  }
+};
+
+const attachPipeline = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    let contact = await FacilityContact.findById(id)
+    if (!contact) {
+      return error404(res, "Contact not found");
+    }
+
+    let pipeline = await Pipeline.findById({ _id: pipelineId })
+    if (!pipeline) {
+      return error404(res, "Pipeline not found");
+    }
+
+    const pipelineContact = await FacilityContact.findByIdAndUpdate(id, { pipelineId: req.body.pipelineId }, { new: true })
+
+    success(res, 200, "Contact updated successfully.", pipelineContact)
   } catch (err) {
     return next(err);
   }
@@ -82,4 +120,6 @@ module.exports = {
   createContact,
   allContact,
   detailOfContact,
+  updateContact,
+  attachPipeline
 };
