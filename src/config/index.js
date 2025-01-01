@@ -7,9 +7,10 @@ module.exports = {
   cloudinary_cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   cloudinary_api_key: process.env.CLOUDINARY_API_KEY,
   cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET,
-  forgot_password_key: process.env.FORGOT_PASSWORD_KEY,
   gmail_app_password: process.env.GMAIL_APP_PASSWORD,
   gmail_app_user: process.env.GMAIL_APP_USER,
+  forgot_password_key: process.env.FORGOT_PASSWORD_KEY,
   apollo_url: process.env.APOLLO_URL,
-  apollo_api_key: process.env.APOLLO_X_API_KEY,
+  apollo_org_api_key: process.env.APOLLO_ORG_API_KEY,
+  apollo_people_api_key: process.env.APOLLO_PEOPLE_API_KEY,
 };

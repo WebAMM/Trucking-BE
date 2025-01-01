@@ -7,8 +7,6 @@ const {
 } = require("../services/helpers/errors");
 //imports from packages
 const jwt = require("jsonwebtoken");
-//config
-const config = require("../config");
 
 const verifyToken = (req, res, next) => {
   try {

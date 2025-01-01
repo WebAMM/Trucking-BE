@@ -9,7 +9,7 @@ const app = express();
 require("dotenv").config();
 
 //Middlewares
-const multer = require("multer");
+const { errorHandler } = require("./middlewares/errorHandler");
 appMiddlewares(app);
 require("express-async-errors");
 
@@ -30,19 +30,7 @@ app.use((req, res) => {
 });
 
 //Error handler, handing multer + app errors
-app.use((err, req, res, next) => {
-  console.log("The error", err);
-  if (err.code === "UNSUPPORTED_FILE_TYPE") {
-    return res.status(400).json({ status: "400", message: err.message });
-  }
-  if (err instanceof multer.MulterError) {
-    return res.status(400).json({ status: "500", message: err.message });
-  }
-  res.status(500).json({
-    status: "500",
-    message: `Unexpected Error: ${err}`,
-  });
-});
+app.use(errorHandler);
 
 //Starting server
 async function startServer() {
