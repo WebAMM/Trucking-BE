@@ -18,5 +18,5 @@ const pipelineSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const User = mongoose.model("PIPELINE", pipelineSchema);
+const User = mongoose.model("Pipeline", pipelineSchema);
 module.exports = User;

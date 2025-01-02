@@ -7,29 +7,43 @@ const Pipeline = require('./../../models/Pipeline.model.js')
 const { error404, error400 } = require("../../services/helpers/errors.js");
 const { status200, success, success201 } = require("../../services/helpers/response.js");
 
-const allContact = async (req, res) => {
+const allContact = async (req, res, next) => {
   const loggedInUser = req.user;
   try {
-    const data = await FacilityContact.find({
-      savedFacilityId: {
-        $in: await SavedFacility.find({
-          userId: loggedInUser._id,
-        }).select("_id"),
-      },
-    }).populate({
-      path: "savedFacilityId",
-      select: "saleAreaId facilityId",
-      populate: [
-        {
+    // const data = await FacilityContact.find({
+    //   savedFacilityId: {
+    //     $in: await SavedFacility.find({
+    //       userId: loggedInUser._id,
+    //     }).select("_id"),
+    //   },
+    // }).populate({
+    //   path: "savedFacilityId",
+    //   select: "saleAreaId facilityId",
+    //   populate: [
+    //     {
+    //       path: "saleAreaId",
+    //       select: "name",
+    //     },
+    //     {
+    //       path: "facilityId",
+    //       select: "name",
+    //     },
+    //   ],
+    // });
+
+    const data = await FacilityContact.find({ userId: loggedInUser._id })
+    .select("-__v -userId -addedFrom -linkedIn")
+      .populate({ path: "pipelineId", select: "name _id" })
+      .populate({
+        path: "savedFacilityId",
+        select: "saleAreaId userId contactIds",
+        populate: {
           path: "saleAreaId",
           select: "name",
         },
-        {
-          path: "facilityId",
-          select: "name",
-        },
-      ],
-    });
+      })
+
+
     return success(res, 200, "All contacts", data);
   } catch (err) {
     return next(err);
@@ -97,6 +111,7 @@ const updateContact = async (req, res, next) => {
 const attachPipeline = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const { pipelineId } = req.body
 
     let contact = await FacilityContact.findById(id)
     if (!contact) {
@@ -108,9 +123,9 @@ const attachPipeline = async (req, res, next) => {
       return error404(res, "Pipeline not found");
     }
 
-    const pipelineContact = await FacilityContact.findByIdAndUpdate(id, { pipelineId: req.body.pipelineId }, { new: true })
+    const pipelineContact = await FacilityContact.findByIdAndUpdate(id, { pipelineId }, { new: true })
 
-    success(res, 200, "Contact updated successfully.", pipelineContact)
+    success(res, 200, "Pipeline attached successfully.", pipelineContact)
   } catch (err) {
     return next(err);
   }

@@ -9,6 +9,7 @@ const EventSchema = new mongoose.Schema(
       type: String,
       required: [true, "Notes is required"],
     },
+    meetingNotes: { type: String, },
     startDate: {
       type: Date,
       required: [true, "startDate is required"],

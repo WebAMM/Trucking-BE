@@ -67,6 +67,13 @@ const validateCreateContact = [
         .withMessage("Coordinates must be an array with two numeric values [longitude, latitude]")
 ];
 
+const attachPipeline = [
+    body("pipelineId")
+        .isMongoId()
+        .withMessage("Pipeline ID must be a valid ObjectId and required"),
+]
+
 module.exports = {
     validateCreateContact,
+    attachPipeline
 };

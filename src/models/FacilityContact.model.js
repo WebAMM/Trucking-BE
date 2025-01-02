@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const facilityContactSchema = new mongoose.Schema(
   {
     savedFacilityId: {
-      type: mongoose.Types.ObjectId,
+      type:  mongoose.Schema.Types.ObjectId,
       ref: "SavedFacility",
       required: [true, "Saved facility id is required"],
     },

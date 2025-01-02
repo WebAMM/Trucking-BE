@@ -1,6 +1,6 @@
 const { body, check, validationResult } = require("express-validator");
 
-const validateEvent = [
+const validateCreateEvent = [
   body("notes")
     .isLength({ min: 1 })
     .withMessage("Notes is required"),
@@ -16,11 +16,6 @@ const validateEvent = [
       }
       return true;
     }),
-  body("userId")
-    .notEmpty()
-    .withMessage("User ID is required")
-    .isMongoId()
-    .withMessage("User ID must be a valid MongoDB ObjectId"),
   body("companyId")
     .notEmpty()
     .withMessage("Company ID is required")
@@ -34,5 +29,5 @@ const validateEvent = [
 ];
 
 module.exports = {
-  validateEvent,
+  validateCreateEvent,
 };
