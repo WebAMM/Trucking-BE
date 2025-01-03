@@ -8,6 +8,7 @@ const {
   error409,
   error404,
   customError,
+  error400,
 } = require("../../services/helpers/errors");
 const { status200, success } = require("../../services/helpers/response");
 
@@ -17,7 +18,7 @@ const createEvent = async (req, res, next) => {
     const user = req.user;
     const { ...body } = req.body
 
-    let company = await SavedFacility.findById(body.companyId)
+    let company = await SavedFacility.findById(body.facilityId)
     if (!company) {
       return error404(res, "Company not found");
     }
@@ -56,7 +57,57 @@ const updateEvent = async (req, res, next) => {
   }
 };
 
+const detailOfEvent = async (req, res, next) => {
+  try {
+    const { id } = req.params
+
+    let event = await Event.findById(id)
+      .populate("facilityId", "-userId -createdAt -updatedAt -addedFrom -pipelineId -__v")
+      .populate("contactId", "-userId -createdAt -updatedAt -addedFrom -pipelineId -__v")
+
+    if (!event) {
+      return error404(res, "Event not found");
+    }
+
+    return success(res, 200, "Detail of event", event);
+  } catch (err) {
+    return next(err);
+  }
+};
+
+const allEvents = async (req, res, next) => {
+  try {
+    const { startDate, endDate } = req.query;
+    const user = req.user;
+
+    if (!startDate && !endDate) {
+      return error400(res, "Start and end dates are required")
+    }
+
+    // Convert startDate and endDate to Date objects
+    const start = startDate ? new Date(startDate) : new Date(0);
+    const end = endDate ? new Date(endDate) : new Date();
+
+    if (start > end) {
+      return error400(res, "startDate cannot be later than endDate");
+    }
+
+    let events = await Event.find({
+      userId: user._id,
+      startDate: { $gte: start },
+      endDate: { $lte: end }
+    });
+
+    return success(res, 200, "All events data", events);
+  } catch (err) {
+    return next(err);
+  }
+};
+
+
 module.exports = {
   createEvent,
   updateEvent,
+  detailOfEvent,
+  allEvents
 };

@@ -4,40 +4,49 @@ const facilitySchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Name is required"],
+      required: true,
     },
-    industry: {
+    streetAddress: {
       type: String,
-      required: [true, "Industry is required"],
+      required: true,
     },
-    description: {
+    city: {
       type: String,
-      required: [true, "Description is required"],
+      required: true,
+    },
+    state: {
+      type: String,
+      required: true,
+    },
+    postalCode: {
+      type: String,
+      required: true,
+    },
+    profileUrl: {
+      type: String,
+      required: true,
     },
     phoneNumber: {
       type: String,
-      required: [true, "PhoneNumber is required"],
+      required: true,
     },
-    //Website url represent google map url
-    companyURL: {
+    websiteURL: {
       type: String,
-      required: [true, "CompanyURL is required"],
+      required: true,
     },
-    linkedin: {
+    distance: {
       type: String,
-      required: [true, "Linkedin is required"],
+      required: true,
     },
-    revenue: {
+    latitude: {
       type: Number,
-      required: [true, "Revenue is required"],
+      required: true,
     },
-    //Profile url represent the google map url
-    address: {
-      type: String,
-      required: [true, "Address is required"],
+    longitude: {
+      type: Number,
+      required: true,
     },
-    saleAreaId: { type: mongoose.Schema.Types.ObjectId, ref: "SaleArea" },
-    meetingNotes: { type: String },
+    // saleAreaId: { type: mongoose.Schema.Types.ObjectId, ref: "SaleArea" },
     location: {
       // Geo JSON Object
       type: { type: String, default: "Point" },

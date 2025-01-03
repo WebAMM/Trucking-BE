@@ -16,11 +16,11 @@ const validateCreateEvent = [
       }
       return true;
     }),
-  body("companyId")
+  body("facilityId")
     .notEmpty()
-    .withMessage("Company ID is required")
+    .withMessage("Facility ID is required")
     .isMongoId()
-    .withMessage("Company ID must be a valid MongoDB ObjectId"),
+    .withMessage("Facility ID must be a valid MongoDB ObjectId"),
   body("contactId")
     .notEmpty()
     .withMessage("Contact ID is required")

@@ -11,4 +11,10 @@ router.post("/create", verifyToken, validateCreateEvent, eventController.createE
 //Update Event, here id represent event id
 router.patch("/update/:id", verifyToken, eventController.updateEvent);
 
+//Event detail, here id represent event id
+router.get("/detail/:id", verifyToken, eventController.detailOfEvent);
+
+//Get Event of user
+router.get("/all", verifyToken, eventController.allEvents);
+
 module.exports = router;
