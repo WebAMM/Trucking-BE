@@ -7,7 +7,6 @@ const savedFacilitySchema = new mongoose.Schema(
       ref: "Facility",
       required: [true, "Facility id is required"],
     },
-    //After attaching the sale area
     saleAreaId: {
       type: mongoose.Types.ObjectId,
       ref: "SaleArea",
@@ -21,18 +20,22 @@ const savedFacilitySchema = new mongoose.Schema(
     shortDescription: {
       type: String,
       default: null,
+      required: [true, "Descriptipn is required"],
     },
     annualRevenue: {
       type: Number,
       default: 0,
+      required: [true, "Revenue is required"],
     },
     industry: {
       type: String,
       default: null,
+      required: [true, "Industry is required"],
     },
     linkedInUrl: {
       type: String,
       default: null,
+      required: [true, "LinkedIn is required"],
     },
     contactIds: [
       {
@@ -40,6 +43,7 @@ const savedFacilitySchema = new mongoose.Schema(
         ref: "FacilityContact",
       },
     ],
+    meetingNotes: { type: String },
     docs: [{
       name: {
         type: String,

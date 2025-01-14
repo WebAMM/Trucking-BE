@@ -3,12 +3,13 @@ const bcryptjs = require("bcryptjs");
 
 const EventSchema = new mongoose.Schema(
   {
-    companyId: { type: mongoose.Schema.Types.ObjectId, ref: "SavedFacility" },
+    facilityId: { type: mongoose.Schema.Types.ObjectId, ref: "SavedFacility" },
     contactId: { type: mongoose.Schema.Types.ObjectId, ref: "FacilityContact" },
     notes: {
       type: String,
       required: [true, "Notes is required"],
     },
+    meetingNotes: { type: String, },
     startDate: {
       type: Date,
       required: [true, "startDate is required"],

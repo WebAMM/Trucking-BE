@@ -3,7 +3,7 @@ const router = require("express").Router();
 const contactController = require("../controllers/contact/contact.controller");
 //middlewares
 const { verifyToken } = require("../middlewares/auth.middleware");
-const { validateCreateContact } = require("../middlewares/contactValidator");
+const { validateCreateContact, attachPipeline } = require("../middlewares/contactValidator");
 
 //All contacts of user
 router.get("/all", verifyToken, contactController.allContact);
@@ -18,6 +18,6 @@ router.post("/create", verifyToken, validateCreateContact, contactController.cre
 router.patch("/update/:id", verifyToken, contactController.updateContact);
 
 //Update contact and attach pipeline, here id represent to contact id
-router.patch("/attachPipeline/:id", verifyToken, contactController.attachPipeline);
+router.patch("/attachPipeline/:id", verifyToken, attachPipeline, contactController.attachPipeline);
 
 module.exports = router;
