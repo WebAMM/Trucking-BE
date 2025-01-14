@@ -14,4 +14,7 @@ router.get("/all", verifyToken, pipelineController.allPipelines);
 //Get All pipeline, id is contact id
 router.patch("/drag/:id", verifyToken, pipelineController.dragContact);
 
+//Get All pipeline, id is contact id
+router.patch("/update/:id", verifyToken, pipelineController.dragContact);
+
 module.exports = router;
