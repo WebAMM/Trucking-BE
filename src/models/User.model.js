@@ -11,40 +11,34 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Email is required"],
     },
-    company: {
-      type: String,
-      required: [true, "Company is required"],
-    },
-    title: {
-      type: String,
-      required: [true, "Title is required"],
-    },
+    company: { type: String },
+    title: { type: String },
     password: {
       type: String,
       required: [true, "Password is required"],
     },
-    phoneNo: {
-      type: String,
-      required: [true, "PhoneNo is required"],
-    },
+    phoneNo: { type: String },
     gender: {
       type: String,
-      required: [true, "Gender is required"],
       enum: ["Male", "Female", "Other"],
       default: "Male"
     },
-    dob: {
-      type: String,
-      required: [true, "DOB is required"],
-    },
-    country: {
-      type: String,
-      required: [true, "Country is required"],
-    },
+    dob: { type: String },
+    country: { type: String },
     status: {
       type: String,
       enum: ["Active", "Inactive"],
       default: "Active",
+    },
+    resetPassOtp: {
+      code: {
+        type: Number,
+        default: null,
+      },
+      expiresAt: {
+        type: Date,
+        default: null,
+      },
     },
     profileImage: {
       publicUrl: {
@@ -65,6 +59,12 @@ const userSchema = new mongoose.Schema(
       enum: ["SuperAdmin", "Admin", "User"],
       default: "User",
       required: [true, "Role is required"],
+    },
+    createdBy: {
+      type: String,
+      enum: ["Self", "Admin", ],
+      default: "Self",
+      required: [true, "CreatedBy is required"],
     },
   },
   { timestamps: true }

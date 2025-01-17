@@ -1,9 +1,10 @@
 const router = require("express").Router();
 //controllers
 const facilityController = require("../controllers/facility/facility.controller");
+const { verifyToken } = require("../middlewares/auth.middleware");
 
 //All facilities, enriching using the organization bulk Api of Apollo
-router.get("/all", facilityController.allFacility);
+router.get("/all", verifyToken, facilityController.allFacility);
 
 //Detail of facility, enriching the organization detail using the Api of Apollo
 router.get("/detail/:id", facilityController.detailOfFacility);

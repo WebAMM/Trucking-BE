@@ -1,9 +1,9 @@
-//Model
+// Model
 const Facility = require("../../models/Facility.model.js");
-//Response and errors
+// Response and errors
 const { error404 } = require("../../services/helpers/errors.js");
 const { status200, success } = require("../../services/helpers/response.js");
-//Helpers
+// Helpers
 const { extractDomain } = require("../../services/helpers/extractDomain.js");
 const {
   bulkOrganizationEnrichment,
@@ -12,31 +12,59 @@ const {
   peopleSearch,
 } = require("../../services/helpers/apollo.js");
 
-//All facilities
+// All facilities
 const allFacility = async (req, res, next) => {
-  const { page = 1, pageSize = 10 } = req.query;
+  const { page = 1, pageSize = 100, radius = 10000, search, address, zipCode } = req.query;
   try {
     const currentPage = parseInt(page);
     const pageLimit = parseInt(pageSize);
     const skip = (currentPage - 1) * pageLimit;
 
-    const data = await Facility.find()
-      .sort({
-        createdAt: -1,
-      })
-      .skip(skip)
-      .limit(pageLimit)
-      .lean();
+    let query = { $or: [] };
 
-    const totalData = await Facility.countDocuments();
+    if (search) {
+      query.$or.push({ name: { $regex: search, $options: "i" } });
+    }
 
+    if (address || zipCode) {
+      if (address) {
+        query.$or.push({ streetAddress: { $regex: address, $options: "i" } });
+      }
+
+      if (zipCode) {
+        query.$or.push({
+          $expr: {
+            $regexMatch: {
+              input: { $toString: "$postalCode" },
+              regex: zipCode,
+              options: "i",
+            },
+          },
+        });
+      }
+    }
+
+    let data = await Facility.aggregate([
+      {
+        $geoNear: {
+          near: req.user?.location?.coordinates || [-83.128166, 39.9169786],
+          distanceField: "distance",
+          maxDistance: parseFloat(radius),
+          spherical: true
+        }
+      },
+      { $match: query },
+      { $sort: { createdAt: -1 } },
+      { $skip: skip },
+      { $limit: pageLimit }
+    ]);
+
+    const totalData = await Facility.countDocuments(query);
     const totalPages = Math.ceil(totalData / pageLimit);
 
-    const extractedDomains = data.map((facility) =>
-      extractDomain(facility.websiteURL)
-    );
+    let extractedDomains = data.length !== 0 ? data.map((facility) => extractDomain(facility.websiteURL)) : [];
+    let enrichedData = extractedDomains.length !== 0 ? await bulkOrganizationEnrichment(extractedDomains) : null;
 
-    const enrichedData = await bulkOrganizationEnrichment(extractedDomains);
     const enrichedFacilities = data.map((facility, index) => ({
       ...facility,
       organizationEnriched: enrichedData[index],
@@ -58,9 +86,9 @@ const allFacility = async (req, res, next) => {
   }
 };
 
-//Detail of facility, enriching the data from apollo
+// Detail of facility, enriching the data from apollo
 const detailOfFacility = async (req, res, next) => {
-  //Id in params of facility
+  // Id in params of facility
   const { id } = req.params;
   try {
     const data = await Facility.findById(id).lean();
@@ -78,9 +106,9 @@ const detailOfFacility = async (req, res, next) => {
   }
 };
 
-//People Search API of Apollo
+// People Search API of Apollo
 const facilitySearchPeople = async (req, res, next) => {
-  //orgId represents the organization orgId from Apollo
+  // orgId represents the organization orgId from Apollo
   const { orgId } = req.params;
   try {
     const data = await peopleSearch(orgId);
@@ -90,9 +118,9 @@ const facilitySearchPeople = async (req, res, next) => {
   }
 };
 
-//People Enrichment API of Apollo
+// People Enrichment API of Apollo
 const facilityPeopleEnrichment = async (req, res, next) => {
-  //orgId represents the person id from Apollo People Search
+  // orgId represents the person id from Apollo People Search
   const { peopleId } = req.params;
   try {
     const data = await peopleEnrichment(peopleId);
