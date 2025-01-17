@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const Facility = require("../../models/Facility.model.js");
 const SaleArea = require("../../models/SaleArea.model.js");
 const SavedFacility = require("../../models/SavedFacility.model.js");
+const FacilityContact = require("../../models/FacilityContact.model.js");
 //Response and errors
 const { error404, error400 } = require("../../services/helpers/errors.js");
 const { status200, success } = require("../../services/helpers/response.js");
@@ -20,22 +21,29 @@ const getSalesArea = async (req, res, next) => {
       userId: loggedInUser._id,
     };
 
-    if (text) {
-      query.name = { $regex: text, $options: "i" };
-    }
+    text ? query.name = { $regex: text, $options: "i" } : undefined
+    status ? query.status = status : undefined
 
-    if (status) {
-      query.status = status;
-    }
-
-    const data = await SaleArea.find(query)
-      .select("-__v -userId -savedFacilityIds")
+    let data = await SaleArea.find(query)
+      .select("-__v -userId")
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(pageLimit);
+      .limit(pageLimit)
+      .lean();
+
+    await Promise.all(data.map(async (saleArea) => {
+      let facilityIds = saleArea?.savedFacilityIds;
+
+      let contacts = await FacilityContact.countDocuments({ savedFacilityId: { $in: facilityIds } });
+
+      // Assign the necessary values to the saleArea object
+      saleArea.contacts = contacts;
+      saleArea.facilities = facilityIds.length;
+
+      delete saleArea.savedFacilityIds;
+    }));
 
     const totalData = await SaleArea.countDocuments(query);
-
     const totalPages = Math.ceil(totalData / pageLimit);
 
     const response = {
@@ -77,6 +85,7 @@ const getAllFacilities = async (req, res, next) => {
       .limit(pageLimit);
 
     const totalData = await SavedFacility.countDocuments({
+      saleAreaId: id,
       userId: loggedInUser._id,
     });
 
