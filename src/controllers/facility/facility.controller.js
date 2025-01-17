@@ -20,7 +20,10 @@ const allFacility = async (req, res, next) => {
     const pageLimit = parseInt(pageSize);
     const skip = (currentPage - 1) * pageLimit;
 
-    let query = { $or: [] };
+    let query = {};
+    if (search || address || zipCode) {
+      query.$or = [];
+    }
 
     if (search) {
       query.$or.push({ name: { $regex: search, $options: "i" } });
