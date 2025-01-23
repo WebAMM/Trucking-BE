@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema(
     },
     dob: { type: String },
     country: { type: String },
+    isAdminCreated: { type: Boolean, default: false },
     status: {
       type: String,
       enum: ["Active", "Inactive"],
@@ -59,12 +60,6 @@ const userSchema = new mongoose.Schema(
       enum: ["SuperAdmin", "Admin", "User"],
       default: "User",
       required: [true, "Role is required"],
-    },
-    createdBy: {
-      type: String,
-      enum: ["Self", "Admin", ],
-      default: "Self",
-      required: [true, "CreatedBy is required"],
     },
   },
   { timestamps: true }

@@ -12,22 +12,26 @@ const { status200, success } = require("../../services/helpers/response");
 const jwt = require("jsonwebtoken");
 const bcryptjs = require("bcryptjs");
 const config = require("../../config/index");
-const { sendOTPPasswordEmail } = require("../../services/emails/email");
+const { sendOTPPasswordEmail, sendAccountCreationEmail } = require("../../services/emails/email");
 
 // Add the user, admin add the user
 const addUser = async (req, res, next) => {
   try {
     const body = JSON.parse(JSON.stringify(req.body));
-    const { email } = body;
+    const { email, isAdminCreated, password } = body;
 
     const userExist = await User.findOne({ email });
     if (userExist) {
       return error409(res, "Email already registered with platform");
     }
 
-    await User.create({
+    let user = await User.create({
       ...body,
     });
+
+    if (isAdminCreated === "true") {
+      await sendAccountCreationEmail(email, password, user);
+    }
 
     return status200(res, "User created successfully");
   } catch (err) {
@@ -85,7 +89,6 @@ const generateResetPasswordEmailWithOTP = async (req, res) => {
     const { email } = req.body;
 
     const user = await User.findOne({ email: email });
-
     if (!user) {
       error404(res, "User not found, make sure you have an account.");
     } else {
@@ -222,7 +225,7 @@ const getAllUsers = async (req, res) => {
     limit = parseInt(limit) || 10;
     const skip = (page - 1) * limit;
 
-    let filter = { createdBy: "Self" };
+    let filter = { isAdminCreated: true };
 
     if (search) {
       filter = {

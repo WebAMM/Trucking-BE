@@ -75,7 +75,8 @@ const detailOfContact = async (req, res) => {
 const createContact = async (req, res, next) => {
   try {
     const { savedFacilityId, name, title, email, phoneNo, company, linkedIn, addedFrom, location } = req.body;
-    let facility = await Facility.findById(savedFacilityId)
+    let facility = await SavedFacility.findById(savedFacilityId)
+    
     if (!facility) {
       return error404(res, "Facility not found");
     }
@@ -84,6 +85,8 @@ const createContact = async (req, res, next) => {
     const facilityContact = await FacilityContact.create({
       userId, name, title, email, phoneNo, company, linkedIn, addedFrom, location, savedFacilityId
     })
+
+    await SavedFacility.findByIdAndUpdate(savedFacilityId, { $push: { contactIds: facilityContact._id } })
 
     success201(res, 201, "Contact created successfully.", facilityContact)
   } catch (err) {
