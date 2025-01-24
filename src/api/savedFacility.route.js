@@ -10,6 +10,9 @@ router.post("/add", verifyToken, savedFacilityController.saveFacility);
 //All saved facilities for specific user
 router.get("/all", verifyToken, savedFacilityController.allSavedFacilities);
 
+// Get all the facilities for dropdown
+router.get("/dropDown", verifyToken, savedFacilityController.facilitiesDropDown);
+
 //Detail of saved facility for specific user
 router.get(
   "/detail/:id",

@@ -5,6 +5,7 @@ const FacilityContact = require("../../models/FacilityContact.model.js");
 //Response and errors
 const { error404, error400 } = require("../../services/helpers/errors.js");
 const { status200, success } = require("../../services/helpers/response.js");
+const Facility = require("../../models/Facility.model.js");
 
 //Save the facility for the user
 const saveFacility = async (req, res, next) => {
@@ -241,6 +242,16 @@ const editContact = async (req, res, next) => {
   }
 };
 
+// Get all the facilities for dropdown
+const facilitiesDropDown = async (req, res, next) => {
+  try {
+    const data = await Facility.find({}).select("_id name");
+    return success(res, 200, "Facilites for drop down fetched successfully.", data);
+  } catch (err) {
+    return next(err);
+  }
+};
+
 module.exports = {
   saveFacility,
   allSavedFacilities,
@@ -249,4 +260,5 @@ module.exports = {
   addContact,
   detailOfSavedFacility,
   editContact,
+  facilitiesDropDown,
 };
